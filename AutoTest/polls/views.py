@@ -1,15 +1,32 @@
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+from rest_framework.decorators import api_view
+from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
 from .models import Subject, Teacher, User
+from .serializers import SubjectSerializer
 from .utils.captcha import gen_random_code, Captcha
 from .utils.md5 import gen_md5_digest
 from rest_framework import serializers
 
 
 # Create your views here.
-def show_subjects(request):
+@api_view(('GET', ))
+def show_subjects(request: HttpRequest) -> HttpResponse:
     subjects = Subject.objects.all().order_by('no')
-    return render(request, '../static/html/subjects.html', {'subjects': subjects})
+    serializer = SubjectSerializer(subjects, many=True)
+    return Response(serializer.data)
+
+
+class SubjectView(ListAPIView):
+    # 通过queryset指定如何获取学科数据
+    queryset = Subject.objects.all()
+    # 通过serializer_class指定如何序列化学科数据
+    serializer_class = SubjectSerializer
+
+
+def index(request: HttpRequest) -> HttpResponse:
+    return render()
 
 
 def show_teachers(request):

@@ -15,18 +15,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path, include
-from polls import views
+from polls.views import SubjectView, show_teachers, praise_or_criticize, login, logout, get_captcha
 import debug_toolbar
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.show_subjects),
-    path('teachers/', views.show_teachers),
-    path('praise/', views.praise_or_criticize),
-    path('criticize/', views.praise_or_criticize),
-    path('login', views.login),
-    path('logout/', views.logout),
-    path('captcha', views.get_captcha),
+    path('', SubjectView.as_view()),
+    path('api/subjects/', SubjectView.as_view()),
+    path('api/teachers/', show_teachers),
+    path('praise/', praise_or_criticize),
+    path('criticize/', praise_or_criticize),
+    path('login', login),
+    path('logout/', logout),
+    path('captcha', get_captcha),
     path('__debug__/', include(debug_toolbar.urls)),
 ]

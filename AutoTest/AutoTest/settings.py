@@ -153,7 +153,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGGING = {
     'version': 1,
     # 是否禁用已经存在的日志器
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     # 日志格式化器
     'formatters': {
         'simple': {
