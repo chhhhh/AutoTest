@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os.path
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,15 +31,26 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'debug_toolbar',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'lists',
+    'polls',
+    'rest_framework',
 ]
 
+# REST_FRAMEWORK = [
+#     # 配置默认页面大小
+#     # 配置默认解析器
+#
+# ]
+
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -49,12 +60,21 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+DEBUG_TOOLBAR_CONFIG = {
+    # 引入jQuery库
+    'JQUERY_URL': 'https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js',
+    # 工具栏是否折叠
+    'SHOW_COLLAPSED': True,
+    # 是否显示工具栏
+    'SHOW_TOOLBAR_CALLBACK': lambda x: True
+}
+
 ROOT_URLCONF = 'AutoTest.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,8 +95,16 @@ WSGI_APPLICATION = 'AutoTest.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'vote',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'USER': 'hellokitty',
+        'PASSWORD': 'Hellokitty.618',
+        'CHARSET': 'utf8',
+        'TIME_ZONE': 'Asia/shanghai'
     }
 }
 
@@ -103,9 +131,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-Hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -114,10 +142,74 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
-
-STATIC_URL = 'static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'), ]
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    # 是否禁用已经存在的日志器
+    'disable_existing_loggers': False,
+    # 日志格式化器
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s %(module)s.%(funcName)s: %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s [%(process)d-%(threadName)s] '
+                      '%(module)s.%(funcName)s line %(lineno)d: %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        }
+    },
+    # 日志过滤器
+    'filters': {
+        # 只有在Django配置文件中DEBUG值为True时才起作用
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    # 日志处理器
+    'handlers': {
+        # 输出到控制台
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'formatter': 'simple',
+        },
+        # 输出到文件(每周切割一次)
+        'file1': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': 'access.log',
+            'when': 'W0',
+            'backupCount': 12,
+            'formatter': 'simple',
+            'level': 'INFO',
+        },
+        # 输出到文件(每天切割一次)
+        'file2': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': 'error.log',
+            'when': 'D',
+            'backupCount': 31,
+            'formatter': 'verbose',
+            'level': 'WARNING',
+        },
+    },
+    # 日志器记录器
+    'loggers': {
+        'django': {
+            # 需要使用的日志处理器
+            'handlers': ['console', 'file1', 'file2'],
+            # 是否向上传播日志信息
+            'propagate': True,
+            # 日志级别(不一定是最终的日志级别)
+            'level': 'DEBUG',
+        },
+    }
+}
